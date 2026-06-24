@@ -1,6 +1,8 @@
+import { auth } from "@/firebase/FireabseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
+import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,28 +17,24 @@ export default function Index() {
   });
 
   useEffect(() => {
-    const checkFirstLaunch = async () => {
-      try {
-        const hasLaunched = await AsyncStorage.getItem("hasLaunched");
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const hasLaunched = await AsyncStorage.getItem("hasLaunched");
 
-        setTimeout(async () => {
-          if (hasLaunched === null) {
-            await AsyncStorage.setItem("hasLaunched", "true");
-            router.replace("/intro");
-          } else {
-            router.replace("/intro");
-          }
+      setTimeout(async () => {
+        if (user) {
+          router.replace("/dashboard");
+        } else if (hasLaunched === null) {
+          await AsyncStorage.setItem("hasLaunched", "true");
+          router.replace("/intro");
+        } else {
+          router.replace("/account");
+        }
 
-          setLoading(false);
-        }, 5000); 
-
-      } catch (e) {
-        console.log(e);
         setLoading(false);
-      }
-    };
+      }, 5000);
+    });
 
-    checkFirstLaunch();
+    return unsubscribe;
   }, []);
 
   if (loading) {

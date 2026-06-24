@@ -2,15 +2,21 @@ import { MaterialIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import DeliverModal from "./DeliverModal";
 import Map from "./Map";
 
-export default function StartTab() {
+type StartTabProps = {
+    setSelectedTab: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export default function StartTab({setSelectedTab}: StartTabProps) {
     
     const [mode, setMode] = useState<"pickup" | "dropoff">("pickup");
     const [showPickup, setShowPickup] = useState(true);
     const [showDropoff, setShowDropoff] = useState(true);
     const [isVisible, setIsVisible] = useState(true);
     const [deliveryId, setDeliveryId] = useState("");
+    const [isProceed, setIsProceed] = useState(false);
 
     useEffect(() => {
         createDeliveryId();
@@ -88,6 +94,7 @@ export default function StartTab() {
 
     return (
         <View style={{ flex: 1 }}>
+
             <Map
                 mode={mode}
                 pickupCoords={pickupCoords}
@@ -96,8 +103,17 @@ export default function StartTab() {
                 setDistance={setDistance}
                 setDuration={setDuration}
             />
+        
+            {/* Deliverymodal */}
+            {isProceed && <View style={{ position: "absolute", 
+                    bottom: 20,
+                    left: 16,
+                    right: 16,}}>
+                {isProceed && <DeliverModal setIsProceed={setIsProceed} pickupAdress={pickupAddress} dropoffAddress={dropoffAddress}
+                    deliveryId={deliveryId} distance={distance} setSelectedTab={setSelectedTab} />}
+            </View>}
 
-            <View
+            {!isProceed && <View
                 pointerEvents="box-none"
                 style={{
                     position: "absolute",
@@ -107,8 +123,8 @@ export default function StartTab() {
                     gap: 12,
                 }}
             >
-    
-                <View style={{ backgroundColor: "#455A64", opacity: 50, borderRadius: 16, paddingBlock: 6, paddingInline: 12, justifyContent: "center", alignItems: "center" }}>
+                
+                <View style={{ backgroundColor: "rgba(69, 90, 100, 0.95)", borderRadius: 16, paddingBlock: 6, paddingInline: 12, justifyContent: "center", alignItems: "center" }}>
                     <Pressable style={{width: "100%", alignItems: "center"}} onPress={() => {
                             setIsVisible((prev) => !prev);
                             }}
@@ -171,8 +187,8 @@ export default function StartTab() {
                                 setShowDropoff((prev) => !prev);
                             }}                         
                         >   
-                            <View style={{backgroundColor: mode === "dropoff" ? "#EA7B7B" : "#E5E7DF", padding: 6, borderRadius: 50,
-                                borderWidth: 2, borderColor: mode === "dropoff" ? "#EA7B7B" : "#E5E7DF"
+                            <View style={{backgroundColor: mode === "pickup" ? "#E5E7DF" : "#EA7B7B", padding: 6, borderRadius: 50,
+                                borderWidth: 2, borderColor: mode === "pickup" ? "#EA7B7B" : "#E5E7DF"
                              }}>
                                 <MaterialIcons
                                     name="location-pin"
@@ -188,7 +204,8 @@ export default function StartTab() {
 
                     {isVisible && <View style={{width: "100%", padding: 12, borderRadius: 12, backgroundColor: "#EA7B7B", marginTop: 12, marginBottom: 6}}>
 
-                        <Pressable style={{width: "100%"}}>
+                        <Pressable style={{width: "100%"}}
+                            onPress={() => setIsProceed((prev) => !prev)}>
                             <Text style={{fontSize: 16, color: "#E5E7DF", textAlign: "center"}}>Proceed</Text>
                         </Pressable>
 
@@ -196,7 +213,7 @@ export default function StartTab() {
                     
                 </View>
 
-            </View>
+            </View>}
         </View>
     );
 }

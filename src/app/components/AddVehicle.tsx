@@ -3,18 +3,22 @@ import {
     Poppins_700Bold,
     useFonts,
 } from "@expo-google-fonts/poppins";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from 'react';
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { SetStateAction, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from "../../firebase/FireabseConfig";
 
-export default function AddVehicle() {
+type AddVehicleProps = {
+    setShowRegister: React.Dispatch<SetStateAction<boolean>>
+}
 
-    const user = auth.currentUser;
+export default function AddVehicle({setShowRegister}: AddVehicleProps) {
+
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const player = useVideoPlayer(require("../assets/Catronaut.mp4"), player => {
@@ -26,20 +30,54 @@ export default function AddVehicle() {
         Poppins_700Bold,
     });
 
+    const [operatorId, setOperatorId] = useState("");
+    const [hubId, setHubId] = useState("");
+
     const [driverName, setDriverName] = useState('');
     const [contactNumber, setContactNumber] = useState('');
     const [plateNumber, setPlateNumber] = useState('');
     const [vehicleName, setVehicleName] = useState('');
     const [vehicleType, setVehicleType] = useState('');
 
+    // useEffect(() => {
+
+    //     setLoading(true);
+
+    //     setTimeout(() => {
+    //         setLoading(false);
+    //     }, 2000)
+    // }, []);
+
     useEffect(() => {
 
-        setLoading(true);
+        const firebaseUser = auth.currentUser;
 
-        setTimeout(() => {
-            setLoading(false);
-        }, 2000)
-    }, []);
+        if (!firebaseUser) {
+            console.log("No firebase user");
+            return;
+        }
+
+        const fetchOperatorId = async () => {
+
+            const driverRef = doc(db, "drivers", firebaseUser.uid);
+
+            console.log("Fetching...");
+
+            const driverDoc = await getDoc(driverRef);
+
+            console.log("Driver exists:", driverDoc.exists());
+
+            if (driverDoc.exists()) {
+                console.log("Driver data:", driverDoc.data());
+
+                setOperatorId(driverDoc.data().operatorId);
+                setHubId(driverDoc.data().hubId);
+            }
+        };
+
+        fetchOperatorId();
+
+    }, [])
 
     const registerVehicle = async () => {
         try {
@@ -68,7 +106,7 @@ export default function AddVehicle() {
             const driverData = driverSnap.data();
             const operatorId = driverData.operatorId;
 
-            await addDoc(collection(db, "operators", operatorId, "vehicles"), {
+            await addDoc(collection(db, "operators", operatorId, "hubs", hubId, "drivers"), {
                 operatorId,
                 driverId: user.uid,
                 driverName,
@@ -78,10 +116,14 @@ export default function AddVehicle() {
                 vehicleType,
                 createdAt: Date.now(),
             });
+
+            await updateDoc(driverRef, {
+                driverName: driverName,
+            });
             
             setLoading(false);
             alert("Vehicle registered successfully!");
-            router.replace('../dashboard')
+            setShowRegister((prev) => !prev);
 
         } catch (err) {
             console.error(err);
@@ -104,28 +146,38 @@ export default function AddVehicle() {
     }
 
     return (
-        <SafeAreaView style={{flex: 1, padding: 12, gap: 3}}>
+        <SafeAreaView style={{flex: 1, width: "100%", justifyContent: "flex-start"}}>
 
-            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 12}}>
+            <Pressable style={{width: "100%", paddingInline: 16}}
+                onPress={() => setShowRegister((prev) => !prev)}>        
+                <MaterialIcons
+                    name="chevron-left"
+                    size={32}
+                    color= "#455A64"
+                />
+            </Pressable>
+
+            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingInline: 24}}>
+
                 <Text style={{ fontSize: 24, marginBlock: 32}}>Register your vehicle</Text>
                 {/* <Image 
                     source={require('../assets/Delivery.png')} 
                     style={{height: 360, width: 360}} 
                 /> */}
-                <TextInput value={driverName} onChangeText={setDriverName} placeholder="Driver Name" 
-                    style={{width: "100%", borderWidth: 1, borderColor: "#141215", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
-                <TextInput value={contactNumber} onChangeText={setContactNumber} placeholder="Contact Number" 
-                    style={{width: "100%", borderWidth: 1, borderColor: "#141215", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
-                <TextInput value={plateNumber} onChangeText={setPlateNumber} placeholder="Plate Number" 
-                    style={{width: "100%", borderWidth: 1, borderColor: "#141215", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
-                <TextInput value={vehicleName} onChangeText={setVehicleName} placeholder="Vehicle Name" 
-                    style={{width: "100%", borderWidth: 1, borderColor: "#141215", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
+                <TextInput value={driverName} onChangeText={setDriverName} placeholder="Driver Name" placeholderTextColor="#455A64"
+                    style={{width: "100%", borderWidth: 2, borderColor: "#455A64", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
+                <TextInput value={contactNumber} onChangeText={setContactNumber} placeholder="Contact Number" placeholderTextColor="#455A64"
+                    style={{width: "100%", borderWidth: 2, borderColor: "#455A64", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
+                <TextInput value={plateNumber} onChangeText={setPlateNumber} placeholder="Plate Number" placeholderTextColor="#455A64"
+                    style={{width: "100%", borderWidth: 2, borderColor: "#455A64", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
+                <TextInput value={vehicleName} onChangeText={setVehicleName} placeholder="Vehicle Name" placeholderTextColor="#455A64"
+                    style={{width: "100%", borderWidth: 2, borderColor: "#455A64", borderRadius: 32, padding: 16, fontSize: 16}}></TextInput>
                 
                 <View
                     style={{
                         width: '100%',
-                        borderWidth: 1,
-                        borderColor: '#141215',
+                        borderWidth: 2,
+                        borderColor: '#455A64',
                         borderRadius: 32,
                         overflow: 'hidden',
                         paddingBlock: 2,
@@ -150,7 +202,8 @@ export default function AddVehicle() {
                         width: "100%",
                         padding: 12,
                         borderRadius: 32,
-                        backgroundColor: "#141215",
+                        backgroundColor: "#455A64",
+                        marginTop: "auto"
                     }}
                 >
                     <Text

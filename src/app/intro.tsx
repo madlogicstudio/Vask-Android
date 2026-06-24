@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Intro() {
 
     const router = useRouter();
-    const [step, setStep] = useState(3);
+    const [step, setStep] = useState(1);
     
     const bike = useVideoPlayer(require("./assets/Bike.mp4"), player => {
         player.loop = true;

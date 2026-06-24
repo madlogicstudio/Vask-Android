@@ -2,8 +2,8 @@ import { AntDesign } from "@expo/vector-icons";
 import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { FlatList, Image, Pressable, Text, TextInput, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { auth, db } from "../../firebase/FireabseConfig";
 
 export default function ChatScreen() {
@@ -14,6 +14,13 @@ export default function ChatScreen() {
     const [operatorId, setOperatorId] = useState("");
     const [chatId, setChatId] = useState("");
     const [hubId, setHubId] = useState("");
+    const [driverName, setDriverName] = useState("");
+    const flatListRef = useRef<FlatList>(null);
+    const [imageSizes, setImageSizes] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+    }, [messages]);
 
     useEffect(() => {
         const firebaseUser = auth.currentUser;
@@ -47,6 +54,7 @@ export default function ChatScreen() {
                 console.log("Driver data:", driverDoc.data());
 
                 setOperatorId(driverDoc.data().operatorId);
+                setDriverName(driverDoc.data().driverName);
             }
         };
 
@@ -102,6 +110,7 @@ export default function ChatScreen() {
                 snapshot.forEach((doc) => {
                     console.log("Chat ID:", doc.id);
                     console.log("Chat Data:", doc.data());
+                    console.log("driverName: ", driverName);
                 });
 
                 if (!snapshot.empty) {
@@ -143,6 +152,7 @@ export default function ChatScreen() {
                 {
                     text,
                     senderId: firebaseUser.uid,
+                    senderName: driverName,
                     senderType: "driver",
                     type: "text",
                     createdAt: serverTimestamp(),
@@ -251,6 +261,7 @@ export default function ChatScreen() {
                 {
                     imageUrl: data.secure_url,
                     senderId: auth.currentUser?.uid,
+                    senderName: driverName,
                     senderType: "driver",
                     type: "image",
                     createdAt: serverTimestamp(),
@@ -263,114 +274,131 @@ export default function ChatScreen() {
         }
     };
 
+    //getmsgimgheaight
+    useEffect(() => {
+        messages.forEach((msg) => {
+            if (msg.type === "image" && !imageSizes[msg.imageUrl]) {
+                Image.getSize(msg.imageUrl, (width, height) => {
+                    setImageSizes(prev => ({
+                        ...prev,
+                        [msg.imageUrl]: width / height,
+                    }));
+                });
+            }
+        });
+    }, [messages]);
+
     return (
-        <View style={{ flex: 1, width: "100%", padding: 12, backgroundColor: "#455A64" }}>
+        <View style={{ flex: 1, width: "100%", padding: 12 }}>
 
+            {/* screen */}
             <FlatList
-                style={{ flex: 1 }}
-                contentContainerStyle={{ padding: 10 }}
+                ref={flatListRef}
                 data={messages}
-                keyExtractor={(item, index) =>
-                    item?.id?.toString() || index.toString()
-                }
-
+                keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
+                contentContainerStyle={{ padding: 10 }}
+                keyboardShouldPersistTaps="handled"
                 renderItem={({ item }) => {
                     const isMe = item?.senderId === currentUserId;
 
-                return (
+                    return (
                     <View
                         style={{
-                            alignSelf: isMe ? "flex-end" : "flex-start",
-                            backgroundColor:
-                                item.type === "image"
-                                    ? "transparent"
-                                    : isMe
-                                    ? "#141215"
-                                    : "#e0e0e0",
-
-                            padding:
-                                item.type === "image"
-                                    ? 0
-                                    : 10,
-                            marginVertical: 4,
-                            borderRadius: 10,
-                            maxWidth: "80%",
-                        }}>
-
-                        <>
-                            {item.type === "image" ? (
-                                <Image
-                                    source={{ uri: item.imageUrl }}
-                                    style={{
-                                        width: 200,
-                                        height: 200,
-                                        borderRadius: 10,
-                                    }}
-                                />
-                            ) : (
-                                <Text
-                                    style={{
-                                        color: isMe ? "white" : "black",
-                                    }}
-                                >
-                                    {item.text}
-                                </Text>
-                            )}
-                        </>
-                    </View>
-                );
-            }}/>
-
-            <View style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingBlock: 10,
-            }}>
-                <Pressable
-                    onPress={sendImage}
-                    style={{
-                        marginRight: 16,
-                    }}
-                >
-                    <Text
-                        style={{
-                            color: "white",
-                            fontSize: 24,
+                        alignSelf: isMe ? "flex-end" : "flex-start",
+                        marginVertical: 6,
                         }}
                     >
-                        <AntDesign name="plus" size={24} color="#ededed" />
-                    </Text>
-                </Pressable>
+                        <Text style={{ fontSize: 12, color: "#455A64" }}>
+                        {item.senderName}
+                        </Text>
 
-                <TextInput
-                    value={text}
-                    onChangeText={setText}
-                    style={{
-                        flex: 1,
-                        borderWidth: 1,
-                        borderColor: "#ccc",
-                        borderRadius: 20,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        color: "white"
-                    }}
-                />
+                        <View
+                        style={{
+                            backgroundColor:
+                            item.type === "image"
+                                ? "transparent"
+                                : isMe
+                                ? "#455A64"
+                                : "#F4F4F6",
+                            padding: item.type === "image" ? 0 : 10,
+                            borderRadius: 12,
+                        }}
+                        >
+                        {item.type === "image" ? (
+                            <Image
+                            source={{ uri: item.imageUrl }}
+                            style={{
+                                width: 200,
+                                aspectRatio: imageSizes[item.imageUrl] || 1,
+                                borderRadius: 10,
+                            }}
+                            />
+                        ) : (
+                            <Text style={{ color: isMe ? "white" : "#455A64" }}>
+                            {item.text}
+                            </Text>
+                        )}
+                        </View>
+                    </View>
+                    );
+                }}
+            />
 
-                <Pressable
-                    onPress={sendMessage}
-                    style={{
-                        marginLeft: 8,
-                        backgroundColor: "#141215",
-                        paddingBlock: 12,
-                        paddingInline: 16,
-                        borderRadius: 20,
-                    }}
-                >
-                    <Text style={{ color: "white" }}>Send</Text>
-                </Pressable>
+            {/* input */}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+                <View style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingBlock: 10,
+                }}>
+                    <Pressable
+                        onPress={sendImage}
+                        style={{
+                            marginRight: 16,
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: "#455A64",
+                                fontSize: 24,
+                            }}
+                        >
+                            <AntDesign name="plus" size={24} color="#455A64" />
+                        </Text>
+                    </Pressable>
 
-            </View>
+                    <TextInput
+                        value={text}
+                        onChangeText={setText}
+                        style={{
+                            flex: 1,
+                            borderWidth: 1,
+                            borderColor: "#455A64",
+                            borderRadius: 20,
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            color: "#455A64",
+                            fontSize: 16
+                        }}
+                    />
 
+                    <Pressable
+                        onPress={sendMessage}
+                        style={{
+                            marginLeft: 8,
+                            backgroundColor: "#455A64",
+                            padding: 12,
+                            width: 70,
+                            borderRadius: 24,
+                        }}
+                    >
+                        <Text style={{ color: "white", fontSize: 16, textAlign: "center" }}>Send</Text>
+                    </Pressable>
+
+                </View>
+            </KeyboardAvoidingView>
         </View>
     );
 }

@@ -1,0 +1,22 @@
+diff --git a/node_modules/react-native-leaflet-view/android/build.gradle b/node_modules/react-native-leaflet-view/android/build.gradle
+index 6a41eb0..dfe911b 100644
+--- a/node_modules/react-native-leaflet-view/android/build.gradle
++++ b/node_modules/react-native-leaflet-view/android/build.gradle
+@@ -3,8 +3,8 @@ buildscript {
+   def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['Leaflet_kotlinVersion']
+ 
+   repositories {
++    mavenCentral()
+     google()
+-    jcenter()
+   }
+ 
+   dependencies {
+@@ -52,7 +52,6 @@ android {
+ 
+ repositories {
+   mavenCentral()
+-  jcenter()
+   google()
+ 
+   def found = false

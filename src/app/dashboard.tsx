@@ -28,11 +28,11 @@ export default function Dashboard() {
             <View style={{ flex: 1, width: "100%", backgroundColor: "#D6D6D6" }}>
                 
                 {selectedTab === "dashboard" && 
-                    <DashboardTab />
+                    <DashboardTab setSelectedTab={setSelectedTab}/>
                 }
 
                 {selectedTab === "report" && 
-                    <ReportTab />
+                    <ReportTab setSelectedTab={setSelectedTab} />
                 }
 
                 {selectedTab === "start" && <View
@@ -42,7 +42,7 @@ export default function Dashboard() {
                         backgroundColor: "#D6D6D6"
                     }}
                 >
-                    <StartTab />
+                    <StartTab setSelectedTab={setSelectedTab} />
                 </View>}
 
                 {selectedTab === "chat" && 

@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "214707084650",
+    "project_id": "madlogicstudio-629a0",
+    "storage_bucket": "madlogicstudio-629a0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214707084650:android:96ebc78ee9b0fc87fc9913",
+        "android_client_info": {
+          "package_name": "com.madlogicstudio.vask"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "214707084650-6ka4pkhalqbdncto626qjakv1pu7b2e1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABg0CxqyYRYDRgN5xtIlQhKmUGdolkbt4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214707084650-6ka4pkhalqbdncto626qjakv1pu7b2e1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "214707084650-r8boob5hdgii46rgq4g0acc4t2tf1l66.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "host.exp.exponent"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

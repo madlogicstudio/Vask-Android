@@ -64,6 +64,7 @@ export default function DashboardNav({setSelectedTab}: DashboardNavProps) {
                     justifyContent: "center",
                     backgroundColor: "#ededed",
                     padding: 12,
+                    zIndex: 4
                 }}
             >
                 <View style={{ alignItems: "center"}}>

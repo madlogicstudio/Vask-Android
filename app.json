@@ -1,39 +1,45 @@
 {
   "expo": {
-    "name": "vask",
+    "name": "Vask",
     "slug": "vask",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/Dark-icon.png",
+    "icon": "./assets/images/Icon.png",
     "scheme": "vask",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/Dark-icon.png"
+      "icon": "./assets/images/Icon.png"
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "",
-        "backgroundImage": "",
-        "monochromeImage": ""
+        "backgroundColor": "#455A64",
+        "foregroundImage": "./assets/images/Icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.vask"
+      "package": "com.madlogicstudio.vask",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/Dark-icon.png"
+      "favicon": "./assets/images/Icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#FFFFFF",
           "android": {
-            "image": "./assets/images/Dark-icon.png",
-            "imageWidth": 76
+            "image": "./assets/images/Icon.png"
           }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/Icon.png",
+          "color": "#455A64"
         }
       ],
       "expo-image",
@@ -43,6 +49,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e889dac7-7232-4855-9400-079e8e6736b0"
+      }
+    },
+    "owner": "madlogicstudiox"
   }
 }

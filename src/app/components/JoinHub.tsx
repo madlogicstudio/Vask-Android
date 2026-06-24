@@ -2,8 +2,7 @@ import { router } from 'expo-router';
 import {
     doc,
     getDoc,
-    serverTimestamp,
-    setDoc,
+    setDoc
 } from 'firebase/firestore';
 import { useState } from 'react';
 import {
@@ -55,23 +54,6 @@ export default function JoinHub() {
                 return;
             }
 
-            // Save driver inside the hub
-            await setDoc(
-                doc(
-                    db,
-                    "operators",
-                    operatorId,
-                    "hubs",
-                    hubId,
-                    "drivers",
-                    firebaseUser.uid
-                ),
-                {
-                    driverId: firebaseUser.uid,
-                    joinedAt: serverTimestamp(),
-                }
-            );
-
             // Save hub information inside driver document
             await setDoc(
                 doc(db, "drivers", firebaseUser.uid),
@@ -103,8 +85,12 @@ export default function JoinHub() {
                     gap: 16,
                 }}
             >
-                <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ width: "100%", fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>
                     Join a Hub
+                </Text>
+
+                <Text style={{ width: "100%", fontSize: 16, textAlign: 'center', color: "gray" }}>
+                    Ask your operator for his and hub id.
                 </Text>
 
                 <Image
@@ -116,11 +102,13 @@ export default function JoinHub() {
                     placeholder="Operator ID"
                     value={operatorId}
                     onChangeText={setOperatorId}
+                    placeholderTextColor="#455A64"
                     style={{
                         borderWidth: 1,
                         borderColor: '#ccc',
                         borderRadius: 10,
                         padding: 12,
+                        fontSize: 16
                     }}
                 />
 
@@ -128,11 +116,13 @@ export default function JoinHub() {
                     placeholder="Hub ID"
                     value={hubId}
                     onChangeText={setHubId}
+                    placeholderTextColor="#455A64"
                     style={{
                         borderWidth: 1,
                         borderColor: '#ccc',
                         borderRadius: 10,
                         padding: 12,
+                        fontSize: 16
                     }}
                 />
 
@@ -146,7 +136,7 @@ export default function JoinHub() {
                         alignItems: 'center',
                     }}
                 >
-                    <Text style={{ color: 'white' }}>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
                         {loading ? "Joining..." : "Join Hub"}
                     </Text>
                 </Pressable>
